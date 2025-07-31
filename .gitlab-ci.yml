@@ -1,0 +1,30 @@
+stages:
+  - mirror
+
+variables:
+  # 設定 Git 使用者資訊（非必要，但建議設）
+  GIT_AUTHOR_NAME: "GitLab Mirror Bot"
+  GIT_AUTHOR_EMAIL: "mirror-bot@gitlab.dev.net"
+
+mirror_repo:
+  image: gitlab.dev.net:5050/shared/container-images/python:3.9-alpine
+  stage: mirror
+  before_script:
+  - apk add --no-cache git git-lfs
+  - git lfs install
+  script:
+    - echo "CI_JOB_TOKEN=$CI_JOB_TOKEN"
+    - echo "CI_PROJECT_URL=$CI_PROJECT_URL"
+    - git config --global user.name "$GIT_AUTHOR_NAME"
+    - git config --global user.email "$GIT_AUTHOR_EMAIL"
+    - git config --global http.sslVerify false
+    - git clone --mirror https://github.com/juouyang/test-lfs.git source.git
+    - cd source.git
+    - git remote set-url --push origin https://oauth2:${MIRROR_PUSH_TOKEN}@gitlab.dev.net/shared/test-lfs-repomir.git
+    - git lfs fetch --all
+    - git lfs push --all origin
+    - git push --mirror
+  only:
+    - schedules
+    - triggers
+    - web
