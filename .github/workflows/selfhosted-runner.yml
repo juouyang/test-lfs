@@ -1,0 +1,17 @@
+# .github/workflows/selfhosted-runner.yml
+name: Self-hosted Runner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-runner:
+    runs-on: self-hosted
+    steps:
+      - name: Show system info
+        run: |
+          echo "Runner Hostname: $(hostname)"
+          echo "OS Info:"
+          uname -a
